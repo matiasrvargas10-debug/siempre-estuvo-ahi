@@ -35,7 +35,7 @@ def sc(t_in, t_out=None, kind='in'):
         s += f', out .45s ease {t_out}s forwards'
     return s
 
-async def _render(html, fn, dur, cover_t, w, h):
+async def _render(html, fn, dur, cover_t, w, h, js=False):
     async with async_playwright() as p:
         b = await p.chromium.launch(); pg = await b.new_page(viewport={'width': w, 'height': h})
         tmp = fn + '.html'; open(tmp, 'w').write(html)
@@ -47,14 +47,16 @@ async def _render(html, fn, dur, cover_t, w, h):
                                    '-movflags', '+faststart', fn + '.mp4'], stdin=subprocess.PIPE)
             for f in range(int(FPS * dur)):
                 await pg.evaluate(f'document.getAnimations().forEach(a=>a.currentTime={f * 1000 / FPS})')
+                if js: await pg.evaluate(f'window.R({f / FPS})')
                 ff.stdin.write(await pg.screenshot(type='jpeg', quality=92))
             ff.stdin.close(); ff.wait()
         await pg.evaluate(f'document.getAnimations().forEach(a=>a.currentTime={cover_t * 1000})')
+        if js: await pg.evaluate(f'window.R({cover_t})')
         await pg.screenshot(path=fn + ('_portada.png' if dur else '.png'))
         await b.close()
     os.remove(tmp)
 
-def render(html, fn, dur, cover_t, w=1080, h=1920):
+def render(html, fn, dur, cover_t, w=1080, h=1920, js=False):
     os.makedirs(os.path.dirname(fn), exist_ok=True)
-    asyncio.run(_render(html, fn, dur, cover_t, w, h))
+    asyncio.run(_render(html, fn, dur, cover_t, w, h, js))
     print('listo', fn)
