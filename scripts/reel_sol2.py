@@ -17,6 +17,7 @@ W = json.load(open(sys.argv[2])) if len(sys.argv) > 2 else {}
 def datos(d):
     s = sun(LOC.observer, date=d, tzinfo=TZ)
     return s['sunrise'].strftime('%H:%M'), s['sunset'].strftime('%H:%M'), round((s['sunset'] - s['sunrise']).total_seconds() / 60), (s['sunset'] - s['sunrise']).total_seconds()
+FECHA = ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'][D.weekday()] + f' {D.day} ' + ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][D.month-1]
 sal, pue, m, secs = datos(D); _s = sun(LOC.observer, date=D, tzinfo=TZ); noon = _s['noon']; alt = round(elevation(LOC.observer, noon)); mid = (noon + dt.timedelta(seconds=30)).strftime('%H:%M'); dif = round((secs - datos(D - dt.timedelta(1))[3]) / 60)
 # próximo día más corto (medio de los empates)
 lst = [(D + dt.timedelta(i), datos(D + dt.timedelta(i))[2]) for i in range(366)]
@@ -58,9 +59,9 @@ body{{margin:0}}
 </style></head><body><div class="root">
 <div class="sky night"></div><div class="sky dawn"></div>
 <div class="sun"></div><div class="clouds"></div><div class="sea"></div><div class="glint"></div>
-<div class="txt"><div class="p1"><p class="kick">MATARÓ · HOY</p><p class="lab">El sol sale del mar a las</p><p class="big">{sal}</p><p class="w">{W.get("w1","")}</p></div>
-<div class="pm"><p class="kick">MATARÓ · HOY</p><p class="lab">llega a lo más alto a las</p><p class="big">{mid}</p><p class="w">{W.get("w2", f"a {alt}° sobre el horizonte")}</p></div>
-<div class="p2"><p class="kick">MATARÓ · HOY</p><p class="lab">y se esconde a las</p><p class="big">{pue}</p><p class="w">{W.get("w3","")}</p></div></div>
+<div class="txt"><div class="p1"><p class="kick">MATARÓ · {FECHA}</p><p class="lab">El sol sale del mar a las</p><p class="big">{sal}</p><p class="w">{W.get("w1","")}</p></div>
+<div class="pm"><p class="kick">MATARÓ · {FECHA}</p><p class="lab">llega a lo más alto a las</p><p class="big">{mid}</p><p class="w">{W.get("w2", f"a {alt}° sobre el horizonte")}</p></div>
+<div class="p2"><p class="kick">MATARÓ · {FECHA}</p><p class="lab">y se esconde a las</p><p class="big">{pue}</p><p class="w">{W.get("w3","")}</p></div></div>
 <div class="info">{W.get("plan","")}<br><b>{m // 60} h {m % 60:02d} min</b> de luz · {cambio}.<br><span>{cola}</span></div>
 </div></body></html>'''
 
